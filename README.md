@@ -1,18 +1,20 @@
 # Battery Quality Data Analysis
 
-**Python | Data Analysis | Report Automation**
+**Python | Battery Quality | Data Analysis | Report Automation**
 
 ## Overview
 
-This project explores the use of Python for analyzing synthetic lithium-ion battery cell measurement data and automating report generation.
+This project explores the use of Python to analyze synthetic lithium-ion battery cell measurement data and automate report generation.
 
-Based on my experience in battery cell development and quality assurance, I developed a small-scale analysis workflow to compare OK and NG samples and generate HTML and PowerPoint reports.
+Building on my experience in battery cell development and quality assurance, I created a small-scale workflow to compare OK and NG samples, examine relationships between measurement parameters, and visualize analysis results.
 
 ## Key Features
 
-- Load and process battery measurement data.
+- Load and process synthetic battery measurement data.
 - Compare measurement characteristics between OK and NG samples.
-- Visualize analysis results.
+- Analyze correlations between measurement parameters.
+- Visualize data distributions and analysis results.
+- Calculate process capability indices (Cp/Cpk), where implemented.
 - Generate HTML and PowerPoint reports using Python.
 
 ## Data Parameters
@@ -28,11 +30,31 @@ Based on my experience in battery cell development and quality assurance, I deve
 - Python
 - Pandas
 - NumPy, where applicable
+- Data visualization libraries used in the implementation
 - HTML and PowerPoint report generation
+
+## How to Run
+
+1. Clone or download this repository.
+2. Ensure the required input files are available in the expected locations.
+3. Install the Python packages required by the application.
+4. Run the script from the project directory:
+
+   ```bash
+   python battery_quality_app_updated.py
+   ```
+
+5. Check the output directory for the generated reports.
+
+**Note:** Execution steps may vary depending on the local environment, package dependencies, and input file paths.
+
+## Data Disclaimer
+
+All datasets used in this project are synthetic data created for learning and demonstration purposes. They do not contain actual manufacturing data or confidential company information.
 
 ## Project Scope
 
-This is a personal learning and demonstration project using synthetic data. It is intended to explore practical applications of Python in battery quality data analysis and reporting automation.
+This is a personal learning and demonstration project focused on applying Python to battery quality data analysis and report automation.
 
 The current implementation is a prototype and is not intended for production quality monitoring or manufacturing decisions.
 
@@ -40,7 +62,7 @@ The current implementation is a prototype and is not intended for production qua
 
 - Expand data validation and error handling.
 - Support datasets of different sizes.
-- Explore SPC and process capability analysis.
+- Explore SPC control charts and additional process capability analysis.
 - Improve report visualization and usability.
 
 ## Author
