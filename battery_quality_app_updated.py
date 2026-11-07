@@ -314,7 +314,7 @@ def calculate_capability(df, specs):
         mean = float(values.mean()) if len(values) else np.nan
         std = float(values.std(ddof=1)) if len(values) >= 2 else np.nan
         lsl, usl, target = spec.get("lsl"), spec.get("usl"), spec.get("target")
-        cp = cpu = cpl = cpk = None
+        cp = cpu = cpl = cpk = None  # 전체 표준편차(overall σ) 기반 → 공정 성능 지수 Pp/Ppk
         if np.isfinite(std) and std > 0:
             if lsl is not None and usl is not None:
                 cp = (usl - lsl) / (6 * std)
@@ -327,7 +327,7 @@ def calculate_capability(df, specs):
         rows.append({"표준명": key, "품질 항목": DISPLAY_NAMES.get(key, key), "데이터 수": len(values),
                      "Target": target, "LSL": lsl, "USL": usl, "평균": mean, "표준편차": std,
                      "평균-Target": delta, "절대편차": abs(delta) if delta is not None else None,
-                     "Cp": cp, "Cpu": cpu, "Cpl": cpl, "Cpk": cpk})
+                     "Pp": cp, "Ppu": cpu, "Ppl": cpl, "Ppk": cpk})
     return pd.DataFrame(rows)
 
 
@@ -392,7 +392,7 @@ def build_plot_sections(df, specs):
 
 def build_dashboard(df, stats, summary, source_name, specs, capability, item_summary, process_summary):
     stats_html = stats.to_html(border=0, classes="stats-table", na_rep="—", float_format=lambda x: f"{x:.4f}")
-    cap_cols = ["품질 항목", "데이터 수", "Target", "LSL", "USL", "평균", "표준편차", "평균-Target", "절대편차", "Cp", "Cpu", "Cpl", "Cpk"]
+    cap_cols = ["품질 항목", "데이터 수", "Target", "LSL", "USL", "평균", "표준편차", "평균-Target", "절대편차", "Pp", "Ppu", "Ppl", "Ppk"]
     cap = capability[cap_cols].copy()
     for col in cap_cols:
         if col not in ("품질 항목", "데이터 수"):
@@ -426,7 +426,7 @@ main{{width:min(1400px,94%);margin:24px auto 50px}}.kpis{{display:grid;grid-temp
 <section class="panel"><h2>기술통계 요약</h2>{stats_html}</section>
 <section class="panel"><h2>항목별 OK/NG 및 결측 요약</h2><p class="note">항목별 합격률과 불량률은 해당 항목에서 OK 또는 NG로 판정된 값만 분모로 사용합니다. 미측정·미판정 값은 비율 계산에서 제외합니다.</p>{item_html}</section>
 <section class="panel"><h2>공정별 OK/NG 비교</h2>{process_html}</section>
-<section class="panel"><h2>규격 및 공정능력 분석</h2><p class="note">LSL·USL이 모두 있고 표준편차가 양수일 때 Cp/Cpk를 계산합니다. 한쪽 규격만 있으면 Cpu 또는 Cpl만 표시합니다. 공정능력 지수는 공정 안정성, 측정 시스템, 표본 대표성을 확인한 뒤 해석하세요. 이 프로젝트의 데이터와 규격이 가상이라면 실제 제품 판정 기준으로 사용하지 마세요.</p>{cap_html}</section>
+<section class="panel"><h2>규격 및 공정능력 분석</h2><p class="note">전체 표준편차(overall σ)로 공정 성능 지수 Pp/Ppk를 계산합니다. 시간 순서·부분군 정보가 없어 군내 σ 기반 Cp/Cpk는 계산하지 않습니다. 한쪽 규격만 있으면 Ppu 또는 Ppl만 표시합니다. 공정능력 지수는 공정 안정성, 측정 시스템, 표본 대표성을 확인한 뒤 해석하세요. 이 프로젝트의 데이터와 규격이 가상이라면 실제 제품 판정 기준으로 사용하지 마세요.</p>{cap_html}</section>
 {graphs}</main></body></html>"""
     HTML_OUTPUT.write_text(page, encoding="utf-8")
     return HTML_OUTPUT
@@ -552,7 +552,7 @@ def build_powerpoint(df, stats, summary, source_name, specs, capability, item_su
                     for run in para.runs: run.font.name="Malgun Gothic"; run.font.size=Pt(9)
 
     slide = prs.slides.add_slide(prs.slide_layouts[5]); add_title(slide, "4. 규격 및 공정능력 분석")
-    cols = ["품질 항목","데이터 수","Target","LSL","USL","평균","표준편차","평균-Target","Cp","Cpu","Cpl","Cpk"]
+    cols = ["품질 항목","데이터 수","Target","LSL","USL","평균","표준편차","평균-Target","Pp","Ppu","Ppl","Ppk"]
     view = capability[cols]
     table = slide.shapes.add_table(len(view)+1, len(cols), Inches(.25), Inches(1.55), Inches(12.85), Inches(min(4.8,.5*(len(view)+1)))).table
     for c, name in enumerate(cols): table.cell(0,c).text = name
@@ -569,7 +569,7 @@ def build_powerpoint(df, stats, summary, source_name, specs, capability, item_su
 
     slide = prs.slides.add_slide(prs.slide_layouts[5]); add_title(slide, "분석 결과 해석 시 유의사항")
     notes = ["상관관계는 인과관계를 의미하지 않습니다.", "관리한계는 통계적 관리 기준이며 제품 규격과 다릅니다.",
-             "Cp/Cpk는 공정 안정성, 측정 시스템, 표본 대표성을 확인한 뒤 해석해야 합니다.",
+             "Pp/Ppk는 전체 표준편차 기반 지수이며, 공정 안정성·측정 시스템·표본 대표성을 확인한 뒤 해석해야 합니다.",
              "결측값은 미측정으로 표시하며 항목별 합격률 분모에서 제외합니다.",
              "공정 비교를 하려면 입력 데이터에 공정명/공정 컬럼이 필요합니다.",
              "가상 데이터 및 연습용 규격은 실제 제품의 출하 판정 기준이 아닙니다."]
